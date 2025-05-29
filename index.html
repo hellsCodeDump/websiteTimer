@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>Lerntimer</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 40px;
+      background-color: #f0f0f0;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+    }
+
+    .timer-settings {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    input[type="number"] {
+      width: 60px;
+      font-size: 1.2em;
+      padding: 5px;
+      text-align: center;
+    }
+
+    button {
+      font-size: 1.2em;
+      padding: 10px 20px;
+      margin: 10px;
+      cursor: pointer;
+    }
+
+    #countdown {
+      font-size: 2em;
+      margin-top: 30px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Lerntimer</h1>
+
+  <div class="timer-settings">
+    <div class="input-group">
+      <label>Lernzeit Minuten</label>
+      <input type="number" id="learnMin" min="0" value="25">
+    </div>
+    <div class="input-group">
+      <label>Lernzeit Sekunden</label>
+      <input type="number" id="learnSec" min="0" max="59" value="0">
+    </div>
+    <div class="input-group">
+      <label>Pausenzeit Minuten</label>
+      <input type="number" id="breakMin" min="0" value="5">
+    </div>
+    <div class="input-group">
+      <label>Pausenzeit Sekunden</label>
+      <input type="number" id="breakSec" min="0" max="59" value="0">
+    </div>
+    <div class="input-group">
+      <label>Wiederholungen</label>
+      <input type="number" id="iterations" min="1" value="4">
+    </div>
+  </div>
+
+  <button onclick="startTimer()">Start</button>
+  <button onclick="stopTimer()">Stopp</button>
+
+  <div id="countdown">Bereit</div>
+
+  <script>
+    let timer;
+    let currentIteration = 0;
+    let isLearning = true;
+
+    function startTimer() {
+      stopTimer(); // Reset vorherigen Timer
+      currentIteration = 0;
+      isLearning = true;
+      runInterval();
+    }
+
+    function stopTimer() {
+      clearTimeout(timer);
+      document.getElementById("countdown").textContent = "Gestoppt";
+    }
+
+    function runInterval() {
+      const learnMin = parseInt(document.getElementById("learnMin").value) || 0;
+      const learnSec = parseInt(document.getElementById("learnSec").value) || 0;
+      const breakMin = parseInt(document.getElementById("breakMin").value) || 0;
+      const breakSec = parseInt(document.getElementById("breakSec").value) || 0;
+      const iterations = parseInt(document.getElementById("iterations").value) || 1;
+
+      if (currentIteration >= iterations) {
+        document.getElementById("countdown").textContent = "Fertig!";
+        return;
+      }
+
+      let duration = isLearning ? (learnMin * 60 + learnSec) : (breakMin * 60 + breakSec);
+      let label = isLearning ? "Lernen" : "Pause";
+
+      function updateCountdown() {
+        const minutes = Math.floor(duration / 60);
+        const seconds = duration % 60;
+        document.getElementById("countdown").textContent =
+          `${label}: ${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+
+        if (duration > 0) {
+          duration--;
+          timer = setTimeout(updateCountdown, 1000);
+        } else {
+          if (!isLearning) currentIteration++;
+          isLearning = !isLearning;
+          runInterval();
+        }
+      }
+
+      updateCountdown();
+    }
+  </script>
+</body>
+</html>
