@@ -47,6 +47,12 @@
       font-size: 2em;
       margin-top: 30px;
     }
+
+    #interval-display {
+      font-size: 1.2em;
+      margin-top: 10px;
+      color: #555;
+    }
   </style>
 </head>
 <body>
@@ -76,25 +82,45 @@
   </div>
 
   <button onclick="startTimer()">Start</button>
+  <button onclick="pauseTimer()">Pause/Fortsetzen</button>
   <button onclick="stopTimer()">Stopp</button>
 
   <div id="countdown">Bereit</div>
+  <div id="interval-display"></div>
 
   <script>
     let timer;
     let currentIteration = 0;
     let isLearning = true;
+    let totalIterations = 0;
+    let paused = false;
+    let remainingTime = 0;
+    let currentLabel = "";
 
     function startTimer() {
       stopTimer(); // Reset vorherigen Timer
       currentIteration = 0;
       isLearning = true;
+      paused = false;
+      totalIterations = parseInt(document.getElementById("iterations").value) || 1;
       runInterval();
     }
 
     function stopTimer() {
       clearTimeout(timer);
       document.getElementById("countdown").textContent = "Gestoppt";
+      document.getElementById("interval-display").textContent = "";
+      paused = false;
+    }
+
+    function pauseTimer() {
+      if (paused) {
+        paused = false;
+        updateCountdown();
+      } else {
+        paused = true;
+        clearTimeout(timer);
+      }
     }
 
     function runInterval() {
@@ -102,33 +128,41 @@
       const learnSec = parseInt(document.getElementById("learnSec").value) || 0;
       const breakMin = parseInt(document.getElementById("breakMin").value) || 0;
       const breakSec = parseInt(document.getElementById("breakSec").value) || 0;
-      const iterations = parseInt(document.getElementById("iterations").value) || 1;
 
-      if (currentIteration >= iterations) {
+      if (currentIteration >= totalIterations) {
         document.getElementById("countdown").textContent = "Fertig!";
+        document.getElementById("interval-display").textContent = "";
         return;
       }
 
-      let duration = isLearning ? (learnMin * 60 + learnSec) : (breakMin * 60 + breakSec);
-      let label = isLearning ? "Lernen" : "Pause";
+      remainingTime = isLearning ? (learnMin * 60 + learnSec) : (breakMin * 60 + breakSec);
+      currentLabel = isLearning ? "Lernen" : "Pause";
 
-      function updateCountdown() {
-        const minutes = Math.floor(duration / 60);
-        const seconds = duration % 60;
-        document.getElementById("countdown").textContent =
-          `${label}: ${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-
-        if (duration > 0) {
-          duration--;
-          timer = setTimeout(updateCountdown, 1000);
-        } else {
-          if (!isLearning) currentIteration++;
-          isLearning = !isLearning;
-          runInterval();
-        }
+      if (isLearning) {
+        document.getElementById("interval-display").textContent = `Intervall ${currentIteration + 1}/${totalIterations}`;
+      } else {
+        document.getElementById("interval-display").textContent = "";
       }
 
       updateCountdown();
+    }
+
+    function updateCountdown() {
+      if (paused) return;
+
+      const minutes = Math.floor(remainingTime / 60);
+      const seconds = remainingTime % 60;
+      document.getElementById("countdown").textContent =
+        `${currentLabel}: ${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+
+      if (remainingTime > 0) {
+        remainingTime--;
+        timer = setTimeout(updateCountdown, 1000);
+      } else {
+        if (!isLearning) currentIteration++;
+        isLearning = !isLearning;
+        runInterval();
+      }
     }
   </script>
 </body>
