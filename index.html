@@ -88,6 +88,10 @@
   <div id="countdown">Bereit</div>
   <div id="interval-display"></div>
 
+  <!-- Audio-Dateien -->
+  <audio id="learnSound" src="boxing-bell-dings-soundroll-single-1-00-06.mp3" preload="auto"></audio>
+  <audio id="breakSound" src="positive-cinematic-brand-ident-swoop-1-00-07.mp3" preload="auto"></audio>
+
   <script>
     let timer;
     let currentIteration = 0;
@@ -96,6 +100,9 @@
     let paused = false;
     let remainingTime = 0;
     let currentLabel = "";
+
+    const learnSound = document.getElementById("learnSound");
+    const breakSound = document.getElementById("breakSound");
 
     function startTimer() {
       stopTimer(); // Reset vorherigen Timer
@@ -140,8 +147,10 @@
 
       if (isLearning) {
         document.getElementById("interval-display").textContent = `Intervall ${currentIteration + 1}/${totalIterations}`;
+        learnSound.play();
       } else {
         document.getElementById("interval-display").textContent = "";
+        breakSound.play();
       }
 
       updateCountdown();
